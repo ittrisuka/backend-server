@@ -61,29 +61,7 @@ app.post("/contact", async (req, res) => {
     const mailOptions = {
       from: "it@trisuka.com",
       to: "it@trisuka.com", // 👈 yahaan bhi wahi email daalo
-      subject: "New Contact Form Submission",
-      text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`
-    };
-
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error("Email Error:", error);
-        return res.status(500).json({ success: false, msg: "Email send failed" });
-      } else {
-        console.log("✅ Email sent:", info.response);
-        return res.status(200).json({ success: true, msg: "Form submitted and email sent" });
-      }
-    });
-
-  } catch (err) {
-    console.error("Error:", err);
-    res.status(500).json({ success: false, msg: "Server error" });
-  }
-});
-
-app.listen(PORT, () => {
-  console.log(`✅ Server started on http://localhost:${PORT}`);
-});*/
+      subject: "New Contact Form Submission",*/
 
 
 const express = require("express");
@@ -97,7 +75,11 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // ✅ Middleware
-app.use(cors());
+app.use(cors({
+  origin: ["https://trisdhagroup.com", "https://www.trisdhagroup.com"], // allowed frontend domains
+  methods: ["GET", "POST"],
+  credentials: true
+}));
 app.use(express.json());
 
 // ✅ MongoDB Connect (Render ke env se MONGO_URI lega)
