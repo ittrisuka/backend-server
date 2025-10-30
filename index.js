@@ -1,4 +1,4 @@
-const express = require("express");
+/*const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const nodemailer = require("nodemailer");
@@ -83,4 +83,86 @@ app.post("/contact", async (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`✅ Server started on http://localhost:${PORT}`);
+});*/
+
+
+const express = require("express");
+const cors = require("cors");
+const mongoose = require("mongoose");
+const nodemailer = require("nodemailer");
+
+const app = express();
+
+// ✅ Render apna port deta hai, fallback 5000 for local
+const PORT = process.env.PORT || 5000;
+
+// ✅ Middleware
+app.use(cors());
+app.use(express.json());
+
+// ✅ MongoDB Connect (Render ke env se MONGO_URI lega)
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("🟢 MongoDB connected successfully"))
+  .catch((err) => console.error("🔴 MongoDB connection failed:", err));
+
+// ✅ Schema for Contact Form
+const contactSchema = new mongoose.Schema({
+  name: String,
+  email: String,
+  message: String,
+  createdAt: { type: Date, default: Date.now }
+});
+
+const Contact = mongoose.model("message", contactSchema);
+
+// ✅ Email Setup using environment variables
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
+
+// ✅ Routes
+app.get("/", (req, res) => {
+  res.send("✅ Backend is running successfully on Render 🚀");
+});
+
+app.post("/contact", async (req, res) => {
+  console.log("📩 Received form data:", req.body);
+
+  try {
+    const { name, email, message } = req.body;
+
+    // ✅ Save to MongoDB
+    const newContact = new Contact({ name, email, message });
+    await newContact.save();
+
+    // ✅ Send Email
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: process.env.EMAIL_USER, // dono same email
+      subject: "New Contact Form Submission",
+      text: `Name: ${name}\nEmail: ${email}\nMessage: ${message}`
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error("Email Error:", error);
+        return res.status(500).json({ success: false, msg: "Email send failed" });
+      } else {
+        console.log("✅ Email sent:", info.response);
+        return res.status(200).json({ success: true, msg: "Form submitted and email sent" });
+      }
+    });
+
+  } catch (err) {
+    console.error("Error:", err);
+    res.status(500).json({ success: false, msg: "Server error" });
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`✅ Server started on port ${PORT}`);
 });
