@@ -7,7 +7,7 @@ const sgMail = require("@sendgrid/mail");
 const app = express(); // ✅ Render apna port deta hai, fallback 5000 for local const 
 PORT = process.env.PORT || 5000; // ✅ Middleware 
 
-app.use(cors({ origin: ["https://trisdhagroup.com", "https://www.trisdhagroup.com"], // allowed frontend domains
+app.use(cors({ origin: ["https://trisdha.com", "https://www.trisdha.com"], // allowed frontend domains
 methods: ["GET", "POST"], 
 credentials: true }));
 
